@@ -9,6 +9,7 @@ import SearchPage from './pages/SearchPage';
 import PlaylistSearchPage from './pages/PlaylistSearchPage';
 import SongSearchPage from './pages/SongSearchPage';
 import ArtistSearchPage from './pages/ArtistSearchPage';
+import AdminPage from './pages/AdminPage';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="search/playlist" element={<PlaylistSearchPage />} />
           <Route path="search/song" element={<SongSearchPage />} />
           <Route path="search/artist" element={<ArtistSearchPage />} />
+          <Route path="admin" element={<AdminPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
