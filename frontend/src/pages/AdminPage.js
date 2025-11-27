@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Container, Card, Form, Button, Row, Col } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 const ADMIN_CARDS = [
   { icon: '🎵', color: '#9370DB', title: '악곡 요청 관리', desc: '사용자 악곡 요청 확인 및 처리' },
@@ -7,7 +8,7 @@ const ADMIN_CARDS = [
   { icon: '🧑‍🎤', color: '#BA55D3', title: '아티스트 관리', desc: '아티스트 정보 추가 및 관리' },
 ];
 
-const AdminCard = ({ data, isLoggedIn }) => {
+const AdminCard = ({ data, isLoggedIn, onClick }) => {
   const buttonStyle = isLoggedIn
     ? { backgroundColor: 'black', color: 'white', padding: '10px 20px' }
     : { backgroundColor: '#ddd', color: '#666', padding: '10px 20px', cursor: 'default' };
@@ -35,7 +36,7 @@ const AdminCard = ({ data, isLoggedIn }) => {
             className="w-100"
             style={buttonStyle}
             disabled={!isLoggedIn}
-            onClick={() => console.log(`${data.title} 클릭`)}
+            onClick={isLoggedIn ? onClick : undefined}
           >
             관리하기
           </Button>
@@ -47,15 +48,24 @@ const AdminCard = ({ data, isLoggedIn }) => {
 
 
 function AdminPage() {
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
-  const [adminId, setAdminId] = useState('');
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(
+      sessionStorage.getItem('adminLoggedIn') === 'true'
+  );
+  const [adminId, setAdminId] = useState(
+      sessionStorage.getItem('adminId') || ''
+  );
+  
   const [idInput, setIdInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
+  const navigate = useNavigate();
 
   const handleLogin = (e) => {
     e.preventDefault();
     
     if (idInput === 'admin' && passwordInput === '1234') {
+        sessionStorage.setItem('adminLoggedIn', 'true');
+        sessionStorage.setItem('adminId', idInput);
+        
         setAdminId(idInput);
         setIsAdminLoggedIn(true);
     } else {
@@ -64,10 +74,20 @@ function AdminPage() {
   };
 
   const handleLogout = () => {
+      sessionStorage.removeItem('adminLoggedIn');
+      sessionStorage.removeItem('adminId');
+      
       setIsAdminLoggedIn(false);
       setAdminId('');
       setIdInput('');
       setPasswordInput('');
+  };
+
+  const handleManageClick = (title) => {
+      if (!isAdminLoggedIn) return;
+      if (title === '악곡 요청 관리') {
+          navigate('/admin/requests');
+      }
   };
 
   const LoginContent = (
@@ -138,7 +158,12 @@ function AdminPage() {
 
       <Row>
         {ADMIN_CARDS.map((card, index) => (
-          <AdminCard key={index} data={card} isLoggedIn={isAdminLoggedIn} />
+          <AdminCard 
+            key={index} 
+            data={card} 
+            isLoggedIn={isAdminLoggedIn} 
+            onClick={() => handleManageClick(card.title)} 
+          />
         ))}
       </Row>
     </Container>
