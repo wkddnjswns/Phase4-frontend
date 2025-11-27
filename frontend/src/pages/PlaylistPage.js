@@ -15,46 +15,57 @@ const PLAYLIST_DATA = [
   { rank: 10, title: '클래식 명작', owner: '고전애호가', songs: 105 },
 ];
 
-const PlaylistCard = ({ rank, title, owner, songs }) => (
-  <Col xs={12} md={6} className="mb-4">
-    <div style={{ backgroundColor: 'white', padding: '15px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-      <div className="d-flex justify-content-between align-items-center mb-2">
-        <div className="d-flex align-items-center">
-          <div 
-            style={{ 
-              width: '24px', 
-              height: '24px', 
-              borderRadius: '50%', 
-              backgroundColor: '#9370DB', 
-              color: 'white', 
-              fontWeight: 'bold', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              fontSize: '0.8em'
-            }}
-            className="me-2"
-          >
-            {rank}
+const PlaylistCard = ({ rank, title, owner, songs, navigate }) => {
+  const handleDetailClick = () => {
+    navigate(`/playlists/${rank}`);
+  };
+  
+  return (
+    <Col xs={12} md={6} className="mb-4">
+      <div style={{ backgroundColor: 'white', padding: '15px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+        <div className="d-flex justify-content-between align-items-center mb-2">
+          <div className="d-flex align-items-center">
+            <div 
+              style={{ 
+                width: '24px', 
+                height: '24px', 
+                borderRadius: '50%', 
+                backgroundColor: '#9370DB', 
+                color: 'white', 
+                fontWeight: 'bold', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                fontSize: '0.8em'
+              }}
+              className="me-2"
+            >
+              {rank}
+            </div>
+            <h5 className="mb-0" style={{ fontSize: '1em', fontWeight: 'bold' }}>{title}</h5>
           </div>
-          <h5 className="mb-0" style={{ fontSize: '1em', fontWeight: 'bold' }}>{title}</h5>
+          <span style={{ color: '#9370DB' }}>🎵</span>
         </div>
-        <span style={{ color: '#9370DB' }}>🎵</span>
-      </div>
-      
-      <div className="mb-3" style={{ fontSize: '0.9em', color: '#666' }}>
-        소유자: {owner}
-      </div>
+        
+        <div className="mb-3" style={{ fontSize: '0.9em', color: '#666' }}>
+          소유자: {owner}
+        </div>
 
-      <div className="d-flex justify-content-between align-items-center">
-        <span style={{ color: '#9370DB', fontWeight: 'bold', fontSize: '0.9em' }}>{songs}곡</span>
-        <Button variant="link" className="p-0" style={{ color: '#666', textDecoration: 'none', fontSize: '0.9em' }}>
-          자세히 보기 →
-        </Button>
+        <div className="d-flex justify-content-between align-items-center">
+          <span style={{ color: '#9370DB', fontWeight: 'bold', fontSize: '0.9em' }}>{songs}곡</span>
+          <Button 
+            variant="link" 
+            className="p-0" 
+            onClick={handleDetailClick}
+            style={{ color: '#666', textDecoration: 'none', fontSize: '0.9em' }}
+          >
+            자세히 보기 →
+          </Button>
+        </div>
       </div>
-    </div>
-  </Col>
-);
+    </Col>
+  );
+};
 
 function PlaylistPage() {
   const navigate = useNavigate();
@@ -72,11 +83,11 @@ function PlaylistPage() {
       </div>
       
       <h2 className="mb-1" style={{ fontWeight: 'bold' }}>플레이리스트 찾아보기</h2>
-      <p className="text-muted mb-4" style={{ fontSize: '0.9em' }}>음원 수가 많은 상위 10개 플레이리스트</p>
+      <p className="text-muted mb-4" style={{ fontSize: '0.9em' }}>응원 수가 많은 상위 10개 플레이리스트</p>
 
       <Row>
         {PLAYLIST_DATA.map(playlist => (
-          <PlaylistCard key={playlist.rank} {...playlist} />
+          <PlaylistCard key={playlist.rank} {...playlist} navigate={navigate} />
         ))}
       </Row>
     </Container>

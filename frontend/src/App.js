@@ -4,6 +4,7 @@ import MainLayout from './components/MainLayout';
 import LoginPage from './pages/LoginPage';
 import MyPage from './pages/MyPage';
 import PlaylistPage from './pages/PlaylistPage';
+import PlaylistDetailPage from './pages/PlaylistDetailPage';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
           <Route index element={<LoginPage />} />
           <Route path="mypage" element={<MyPage />} />
           <Route path="playlists" element={<PlaylistPage />} />
+          <Route path="playlists/:rank" element={<PlaylistDetailPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
