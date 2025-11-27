@@ -6,6 +6,7 @@ import MyPage from './pages/MyPage';
 import PlaylistPage from './pages/PlaylistPage';
 import PlaylistDetailPage from './pages/PlaylistDetailPage';
 import SearchPage from './pages/SearchPage';
+import PlaylistSearchPage from './pages/PlaylistSearchPage';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="playlists" element={<PlaylistPage />} />
           <Route path="playlists/:rank" element={<PlaylistDetailPage />} />
           <Route path="search" element={<SearchPage />} />
+          <Route path="search/playlist" element={<PlaylistSearchPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
