@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, Form, Button, Row, Col, Container } from 'react-bootstrap';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 
 const LoggedInInfoCard = ({ userName, onLogout }) => (
   <Card className="p-4 mb-4 shadow-sm" style={{ border: 'none', backgroundColor: 'white' }}>
@@ -22,8 +23,8 @@ const LoggedInInfoCard = ({ userName, onLogout }) => (
 
 
 function LoginPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState('');
+  const { isLoggedIn, setIsLoggedIn, username, setUsername } = useOutletContext();
+  const navigate = useNavigate(); 
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -35,6 +36,15 @@ function LoginPage() {
       setIsLoggedIn(false);
       setUsername('');
   };
+
+  const handleGoToMyPage = () => {
+    navigate('/mypage'); 
+  };
+
+  const infoButtonVariant = isLoggedIn ? 'dark' : 'light';
+  const infoButtonStyle = isLoggedIn
+    ? { backgroundColor: 'black', color: 'white', padding: '20px' }
+    : { backgroundColor: '#f0f0f0', color: '#333', padding: '20px' };
 
   return (
     <Container style={{ width: '100%', maxWidth: '700px' }}>
@@ -78,19 +88,24 @@ function LoginPage() {
 
       <Row className="g-3">
         <Col>
-          <Button variant="dark" className="w-100" style={{ backgroundColor: 'black', color: 'white', padding: '20px', minHeight: '80px' }}>
+          <Button variant="dark" className="w-100" style={{ backgroundColor: 'black', color: 'white', padding: '20px' }}>
             검색하기
           </Button>
         </Col>
 
         <Col>
-          <Button variant="light" className="w-100" style={{ backgroundColor: '#f0f0f0', color: '#333', padding: '20px', minHeight: '80px' }}>
+          <Button 
+            variant={infoButtonVariant} 
+            className="w-100" 
+            style={infoButtonStyle}
+            onClick={isLoggedIn ? handleGoToMyPage : undefined}
+          >
             내 정보 보기
           </Button>
         </Col>
 
         <Col>
-          <Button variant="dark" className="w-100" style={{ backgroundColor: 'black', color: 'white', padding: '20px', minHeight: '80px' }}>
+          <Button variant="dark" className="w-100" style={{ backgroundColor: 'black', color: 'white', padding: '20px' }}>
             플레이리스트 찾아보기
           </Button>
         </Col>
