@@ -40,9 +40,13 @@ function LoginPage() {
   const handleGoToMyPage = () => {
     navigate('/mypage'); 
   };
-
+  
   const handleGoToPlaylists = () => {
     navigate('/playlists');
+  };
+
+  const handleGoToSearch = () => {
+    navigate('/search');
   };
 
   const infoButtonVariant = isLoggedIn ? 'dark' : 'light';
@@ -92,7 +96,12 @@ function LoginPage() {
 
       <Row className="g-3">
         <Col>
-          <Button variant="dark" className="w-100" style={{ backgroundColor: 'black', color: 'white', padding: '20px' }}>
+          <Button 
+            variant="dark" 
+            className="w-100" 
+            style={{ backgroundColor: 'black', color: 'white', padding: '20px' }}
+            onClick={handleGoToSearch}
+          >
             검색하기
           </Button>
         </Col>
