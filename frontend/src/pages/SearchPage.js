@@ -41,6 +41,10 @@ function SearchPage() {
     navigate('/search/playlist');
   };
 
+  const handleSongSearchClick = () => {
+    navigate('/search/song');
+  };
+
   return (
     <Container style={{ maxWidth: '900px' }}>
       <div className="mb-4 d-flex align-items-center">
@@ -67,6 +71,7 @@ function SearchPage() {
           color="#3CB371" 
           title="악곡 검색" 
           description="곡명, 아티스트, 제공원 검색"
+          onClick={handleSongSearchClick}
         />
         <SearchCard 
           icon="🧑‍🎤" 
