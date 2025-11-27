@@ -41,6 +41,10 @@ function LoginPage() {
     navigate('/mypage'); 
   };
 
+  const handleGoToPlaylists = () => {
+    navigate('/playlists');
+  };
+
   const infoButtonVariant = isLoggedIn ? 'dark' : 'light';
   const infoButtonStyle = isLoggedIn
     ? { backgroundColor: 'black', color: 'white', padding: '20px' }
@@ -105,7 +109,12 @@ function LoginPage() {
         </Col>
 
         <Col>
-          <Button variant="dark" className="w-100" style={{ backgroundColor: 'black', color: 'white', padding: '20px' }}>
+          <Button 
+            variant="dark" 
+            className="w-100" 
+            style={{ backgroundColor: 'black', color: 'white', padding: '20px' }}
+            onClick={handleGoToPlaylists}
+          >
             플레이리스트 찾아보기
           </Button>
         </Col>
