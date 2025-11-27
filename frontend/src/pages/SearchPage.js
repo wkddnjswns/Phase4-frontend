@@ -45,6 +45,10 @@ function SearchPage() {
     navigate('/search/song');
   };
 
+  const handleArtistSearchClick = () => {
+    navigate('/search/artist');
+  };
+
   return (
     <Container style={{ maxWidth: '900px' }}>
       <div className="mb-4 d-flex align-items-center">
@@ -78,6 +82,7 @@ function SearchPage() {
           color="#BA55D3" 
           title="아티스트 검색" 
           description="이름, 성별, 역할 검색"
+          onClick={handleArtistSearchClick}
         />
       </Row>
     </Container>
