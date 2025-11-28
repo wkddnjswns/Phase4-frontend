@@ -87,6 +87,8 @@ function AdminPage() {
       if (!isAdminLoggedIn) return;
       if (title === '악곡 요청 관리') {
           navigate('/admin/requests');
+      } else if (title === '제공원 관리') {
+          navigate('/admin/providers');
       }
   };
 
