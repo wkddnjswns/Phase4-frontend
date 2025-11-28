@@ -89,6 +89,8 @@ function AdminPage() {
           navigate('/admin/requests');
       } else if (title === '제공원 관리') {
           navigate('/admin/providers');
+      } else if (title === '아티스트 관리') {
+          navigate('/admin/artists');
       }
   };
 
