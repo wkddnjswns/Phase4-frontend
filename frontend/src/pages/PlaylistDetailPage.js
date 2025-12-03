@@ -1,132 +1,159 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Container, Button, Table } from 'react-bootstrap';
+import { Container, Button, Table, Spinner, Alert } from 'react-bootstrap';
+import apiClient from '../api/apiClient'; // apiClient 임포트 경로 확인
 
-const PLAYLIST_DATA_MOCK = {
-  '1': { title: 'K-Pop 메가 히트', owner: '음악큐레이터', songs: 150, details: [
-      { song: 'Dynamite', artist: 'BTS' },
-      { song: 'Butter', artist: 'BTS' },
-      { song: 'Love Dive', artist: 'IVE' },
-    ]
-  },
-  '2': { title: '발라드 명곡 컬렉션', owner: '감성DJ', songs: 145, details: [
-      { song: 'Good Day', artist: 'IU' },
-      { song: 'Missing You', artist: 'TOY' },
-      { song: 'Always', artist: 'Yoon Mi-rae' },
-    ]
-  },
-  '3': { title: '운동할 때 듣는 음악', owner: '피트니스왕', songs: 140, details: [
-      { song: 'Power', artist: 'EXO' },
-      { song: 'Fire', artist: 'BTS' },
-      { song: 'Boom Boom', artist: 'Momoland' },
-    ]
-  },
-  '4': { title: '카페 분위기 재즈', owner: '재즈리버', songs: 135, details: [
-      { song: 'Autumn Leaves', artist: 'Miles Davis' },
-      { song: 'Take Five', artist: 'Dave Brubeck' },
-      { song: 'Lullaby of Birdland', artist: 'Sarah Vaughan' },
-    ]
-  },
-  '5': { title: '출퇴근길 팝송', owner: '음악통근러', songs: 130, details: [
-      { song: 'Shape of You', artist: 'Ed Sheeran' },
-      { song: 'Blinding Lights', artist: 'The Weeknd' },
-      { song: 'Uptown Funk', artist: 'Mark Ronson' },
-    ]
-  },
-  '6': { title: '힙합 모음집', owner: '힙합헤드', songs: 125, details: [
-      { song: 'Gangnam Style', artist: 'PSY' },
-      { song: 'Nunu Nana', artist: 'Jessi' },
-      { song: 'Any Song', artist: 'Zico' },
-    ]
-  },
-  '7': { title: '락 레전드', owner: '락스타', songs: 120, details: [
-      { song: 'Bohemian Rhapsody', artist: 'Queen' },
-      { song: 'Stairway to Heaven', artist: 'Led Zeppelin' },
-      { song: 'Smells Like Teen Spirit', artist: 'Nirvana' },
-    ]
-  },
-  '8': { title: '인디 음악 탐험', owner: '인디러버', songs: 115, details: [
-      { song: 'How can I love the heartbreak, you\'re the one I love', artist: 'AKMU' },
-      { song: 'Through the Night', artist: 'IU' },
-      { song: 'Busan Vacance', artist: 'Busker Busker' },
-    ]
-  },
-  '9': { title: 'EDM 파티 믹스', owner: '클럽왕', songs: 110, details: [
-      { song: 'Levels', artist: 'Avicii' },
-      { song: 'Clarity', artist: 'Zedd' },
-      { song: 'Wake Me Up', artist: 'Avicii' },
-    ]
-  },
-  '10': { title: '클래식 명작', owner: '고전애호가', songs: 105, details: [
-      { song: 'Symphony No. 5', artist: 'Beethoven' },
-      { song: 'Moonlight Sonata', artist: 'Beethoven' },
-      { song: 'Canon in D', artist: 'Pachelbel' },
-    ]
-  },
-};
-
-const SPOTIFY_LINK = 'https://open.spotify.com/';
+// 빈 객체/배열로 초기화하여 조건부 렌더링에 대비
+const INITIAL_DETAIL = { id: null, title: '로딩 중...', ownerNickname: '', songs: 0, isCollaborative: false };
 
 function PlaylistDetailPage() {
-  const navigate = useNavigate();
-  const { rank } = useParams();
+    const navigate = useNavigate();
+    // URL 경로에서 ID를 가져옵니다. (이전에는 'rank'였지만, API는 'playlistId'를 사용)
+    const { id } = useParams(); 
 
-  const data = PLAYLIST_DATA_MOCK[rank] || PLAYLIST_DATA_MOCK['1']; 
-  const detailSongs = data.details;
+    const [playlistDetail, setPlaylistDetail] = useState(INITIAL_DETAIL);
+    const [songs, setSongs] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-  const handleGoBack = () => {
-    navigate(-1);
-  };
-  
-  const handleLinkClick = () => {
-    window.open(SPOTIFY_LINK, '_blank');
-  };
+    // 1. 🖼️ 플레이리스트 상세 정보 및 곡 목록 조회
+    const fetchPlaylistDetails = async () => {
+        setIsLoading(true);
+        setError(null);
+        
+        // ID가 유효한 숫자가 아닐 경우를 대비
+        const playlistId = parseInt(id, 10);
+        if (isNaN(playlistId)) {
+            setError("유효하지 않은 플레이리스트 ID입니다.");
+            setIsLoading(false);
+            return;
+        }
 
-  return (
-    <Container style={{ maxWidth: '900px' }}>
-      <div className="mb-4 d-flex align-items-center">
-        <Button variant="link" onClick={handleGoBack} className="p-0" style={{ color: '#333' }}>
-          ← 플레이리스트 목록으로
-        </Button>
-      </div>
-      
-      <div className="mb-5">
-        <h2 className="mb-1" style={{ fontWeight: 'bold' }}>{data.title}</h2>
-        <p className="text-muted" style={{ fontSize: '0.9em' }}>
-          소유자: {data.owner} | 총 {data.songs}곡
-        </p>
-      </div>
+        try {
+            // 두 개의 API 호출을 동시에 실행합니다.
+            const [detailResponse, songsResponse] = await Promise.all([
+                // API 4.3.5 플레이리스트 상세 조회
+                apiClient.get(`/playlists/${playlistId}`), 
+                // API 4.3.6 플레이리스트 곡 목록 조회
+                apiClient.get(`/playlists/${playlistId}/songs`), 
+            ]);
 
-      <Table borderless className="mb-5">
-        <thead style={{ color: '#555' }}>
-          <tr>
-            <th className="p-0 pb-2 border-bottom" style={{ width: '50%' }}>곡명</th>
-            <th className="p-0 pb-2 border-bottom" style={{ width: '30%' }}>아티스트</th>
-            <th className="p-0 pb-2 border-bottom" style={{ width: '20%' }}>링크</th>
-          </tr>
-        </thead>
-        <tbody>
-          {detailSongs.map((song, index) => (
-            <tr key={index}>
-              <td className="p-0 py-2">{song.song}</td>
-              <td className="p-0 py-2">{song.artist}</td>
-              <td className="p-0 py-2">
-                <Button 
-                  variant="link" 
-                  onClick={handleLinkClick} 
-                  className="p-0" 
-                  style={{ color: '#007bff', textDecoration: 'none', fontSize: '0.9em' }}
-                >
-                  <span style={{ fontSize: '1em' }}>{'⇗'}</span> 링크
+            // 1. 상세 정보 처리
+            if (detailResponse.data.success) {
+                const detail = detailResponse.data.data;
+                // ownerNickname 필드가 상세 조회 응답에 포함되어 있다고 가정합니다. (API 명세 4.3.5와 4.3.1 참조)
+                setPlaylistDetail({
+                    ...detail,
+                    ownerNickname: detail.ownerNickname || `User ${detail.userld}`, // 닉네임이 없을 경우 대비
+                });
+            }
+
+            // 2. 곡 목록 처리
+            if (songsResponse.data.success) {
+                // 응답 구조: { success: true, data: { songs: [..], totalSongs: N } }
+                const fetchedSongs = songsResponse.data.data.songs;
+                setSongs(fetchedSongs);
+                // 총 곡 수는 songsResponse에서 가져오는 것이 더 정확할 수 있습니다.
+                setPlaylistDetail(prev => ({ 
+                    ...prev, 
+                    songs: songsResponse.data.data.totalSongs 
+                }));
+            }
+        } catch (err) {
+            console.error("플레이리스트 상세 로드 오류:", err.response || err);
+            if (err.response && err.response.status === 404) {
+                setError("요청하신 플레이리스트를 찾을 수 없습니다."); // ⬅️ API 404 실패 응답
+            } else {
+                setError("데이터를 불러오는 중 오류가 발생했습니다. 서버 연결 상태를 확인해주세요.");
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchPlaylistDetails();
+    }, [id]); // id가 변경될 때마다 재호출
+
+    const handleGoBack = () => {
+        navigate(-1);
+    };
+    
+    const handleLinkClick = (playLink) => {
+        // 실제 곡의 재생 링크로 이동
+        window.open(playLink, '_blank');
+    };
+
+    if (isLoading) {
+        return (
+            <Container style={{ maxWidth: '900px' }} className="text-center py-5">
+                <Spinner animation="border" /> <p className="mt-2">플레이리스트 정보 로딩 중...</p>
+            </Container>
+        );
+    }
+
+    if (error) {
+        return (
+            <Container style={{ maxWidth: '900px' }} className="py-5">
+                <Alert variant="danger">{error}</Alert>
+                <Button variant="secondary" onClick={handleGoBack}>목록으로 돌아가기</Button>
+            </Container>
+        );
+    }
+    
+    // 정상적으로 로딩된 데이터
+    const data = playlistDetail; 
+
+    return (
+        <Container style={{ maxWidth: '900px' }}>
+            <div className="mb-4 d-flex align-items-center">
+                <Button variant="link" onClick={handleGoBack} className="p-0" style={{ color: '#333' }}>
+                    ← 플레이리스트 목록으로
                 </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+            </div>
+            
+            <div className="mb-5">
+                <h2 className="mb-1" style={{ fontWeight: 'bold' }}>{data.title}</h2>
+                <p className="text-muted" style={{ fontSize: '0.9em' }}>
+                    소유자: **{data.ownerNickname}** | 총 **{data.songs}**곡 
+                    {data.isCollaborative ? ' | (협업 가능)' : ''}
+                </p>
+            </div>
 
-    </Container>
-  );
+            <Table borderless className="mb-5">
+                <thead style={{ color: '#555' }}>
+                    <tr>
+                        <th className="p-0 pb-2 border-bottom" style={{ width: '50%' }}>곡명</th>
+                        <th className="p-0 pb-2 border-bottom" style={{ width: '30%' }}>아티스트</th>
+                        <th className="p-0 pb-2 border-bottom" style={{ width: '20%' }}>재생 링크</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {songs.map((song) => (
+                        <tr key={song.id}>
+                            <td className="p-0 py-2">{song.title}</td>
+                            <td className="p-0 py-2">{song.artistName}</td>
+                            <td className="p-0 py-2">
+                                <Button 
+                                    variant="link" 
+                                    onClick={() => handleLinkClick(song.playLink)} // 서버에서 받은 playLink 사용
+                                    className="p-0" 
+                                    style={{ color: '#007bff', textDecoration: 'none', fontSize: '0.9em' }}
+                                >
+                                    <span style={{ fontSize: '1em' }}>{'⇗'}</span> 재생
+                                </Button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </Table>
+            
+            {songs.length === 0 && !isLoading && (
+                <Alert variant="info" className="text-center">이 플레이리스트에는 아직 곡이 없습니다.</Alert>
+            )}
+
+        </Container>
+    );
 }
 
 export default PlaylistDetailPage;
